@@ -12,9 +12,9 @@ from modules.preprocessing import preprocess_docs
 from modules.vectorstore import build_vectorstore
 from modules.rag_chain import build_rag_chain
 
-# ----------------------------
+
 # Load environment variables
-# ----------------------------
+
 load_dotenv()
 api_key = os.getenv("OPENROUTER_API_KEY")
 
@@ -26,18 +26,17 @@ else:
 
 st.title("📘 Falcon via OpenRouter + RAG")
 
-# ----------------------------
+
 # Ensure default sample file exists
-# ----------------------------
+
 default_file = os.path.join("data", "sample.txt")
 if not os.path.exists(default_file):
     os.makedirs("data", exist_ok=True)
     with open(default_file, "w", encoding="utf-8") as f:
         f.write("This is a sample document. You can ask questions about it.")
 
-# ----------------------------
 # File Upload
-# ----------------------------
+
 uploaded_file = st.file_uploader("Upload a document", type=["txt", "pdf", "docx"])
 
 if uploaded_file is not None:
@@ -49,17 +48,17 @@ if uploaded_file is not None:
 else:
     docs = load_docs(default_file)
 
-# ----------------------------
+
 # Preprocess & Embeddings
-# ----------------------------
+
 split_docs = preprocess_docs(docs)
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 vectorstore = build_vectorstore(split_docs, embeddings)
 retriever = vectorstore.as_retriever()
 
-# ----------------------------
+
 # OpenRouter LLM Setup
-# ----------------------------
+
 llm = ChatOpenAI(
     model="google/gemini-2.0-flash-001",  # You can change to any available OpenRouter model
     openai_api_key=api_key,
@@ -68,14 +67,14 @@ llm = ChatOpenAI(
     max_tokens=512
 )
 
-# ----------------------------
+
 # Build RAG Chain
-# ----------------------------
+
 qa_chain = build_rag_chain(llm, retriever)  # ensure return_source_documents=True in rag_chain.py
 
-# ----------------------------
+
 # Safe LLM call with retries
-# ----------------------------
+
 def safe_qa_call(chain, query, retries=5):
     for i in range(retries):
         try:
@@ -86,9 +85,9 @@ def safe_qa_call(chain, query, retries=5):
     st.error("LLM is currently unavailable. Try again later.")
     return None
 
-# ----------------------------
+
 # Query
-# ----------------------------
+
 query = st.text_input("Enter your question")
 
 if query:
